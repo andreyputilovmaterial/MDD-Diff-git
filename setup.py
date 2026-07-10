@@ -57,6 +57,7 @@ def call_executable(subprocess_args,path,timeout,scope,input=None):
         text=True,
         timeout=timeout,
         **argsadd,
+        encoding='utf-8',
     )
     if subprocess_results.stdout.strip():
         for line in subprocess_results.stdout.splitlines(keepends=False):
