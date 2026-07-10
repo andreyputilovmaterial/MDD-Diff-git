@@ -29,6 +29,7 @@ else:
 
 
 def write_program_files(path,files_data):
+    """Self-written wrapper to write actual files to physical location"""
     output_root = Path(path).resolve()
     # print(f'Creating program files in {output_root}...')
     n_processed = 0
@@ -46,6 +47,11 @@ def write_program_files(path,files_data):
 
 
 def call_executable(subprocess_args,path,timeout,scope,input=None):
+    """Self-written wrapper to ease launching of an executable
+    
+    Will grab outputs and manage it
+    
+    "scope" means part added to the beginning of every line in outputs"""
     print(f'{scope}: launch executable; to verify: path == "{path}", callable == "{subprocess_args[0]}"')
     argsadd = []
     if input:
@@ -71,7 +77,11 @@ def call_executable(subprocess_args,path,timeout,scope,input=None):
 
 
 def get_python_base_exe():
-    """Some fallback fn to find "system" python executable to set venv - but it looks it is not needed. The issue was very different"""
+    """Helper, I was thinking it helps address some issues with venv, but maybe this is unnecessary
+    
+    The goal is to point to real python executable for setting new venv
+    
+    Some fallback fn to find "system" python executable to set venv - but it looks it is not needed. The issue was very different"""
     try:
         env = os.environ.copy()
         env.pop('VIRTUAL_ENV',None)
@@ -93,6 +103,7 @@ def get_python_base_exe():
 
 
 def call_install_copy_program_files_program(*argcs,**kwargs):
+    """Actually, installs files"""
 
     time_start = datetime.now()
     script_name = 'git-textconv-mdd script'
@@ -171,6 +182,7 @@ def call_install_copy_program_files_program(*argcs,**kwargs):
     # print(f'{script_name}: finished at {time_finish} (elapsed {time_finish-time_start})')
 
 def call_install_git_register_program(*argcs,**kwargs):
+    """Adds global config to git"""
 
     time_start = datetime.now()
     script_name = 'git-textconv-mdd script'
@@ -221,6 +233,7 @@ def call_install_git_register_program(*argcs,**kwargs):
 
 
 def call_install_program(*argcs,**kwargs):
+    """Wrapper for calling individual install scripts - depending on value of --action param"""
 
     time_start = datetime.now()
     script_name = 'git-textconv-mdd script'
@@ -254,10 +267,12 @@ def call_install_program(*argcs,**kwargs):
 
 
 def call_uninstall_program(*argcs,**kwargs):
+    """Actually, uninstaller"""
     raise NotImplementedError('Not implemented!')
 
 
 def call_test_program(*argcs,**kwargs):
+    """Only prints some test message, that helps me verify the bundle is working and is starting"""
     msg = '''
 hello, world! From git-textconv-mdd setup script
     '''
@@ -265,11 +280,13 @@ hello, world! From git-textconv-mdd setup script
     return True
 
 def call_done_program(*argcs,**kwargs):
+    """Same, only prints a message - to be called when installation is finished"""
     msg = f'{STDOUT_COLOR_GREEN}Done!"{STDOUT_COLOR_RESET}'
     print(msg)
     return True
 
 def call_printversion_program(*argcs,**kwargs):
+    """Prints tool version"""
     msg = gittextconvmdd_script_version
     msg = msg.strip()
     print(msg)
@@ -288,6 +305,7 @@ run_programs = {
 
 
 def main():
+    """main() here is another wrapper that calls actual function that handles this exact step, depending on value in --program param"""
     try:
         parser = argparse.ArgumentParser(
             description="git-textconv-mdd"

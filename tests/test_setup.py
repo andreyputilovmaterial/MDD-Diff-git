@@ -39,7 +39,8 @@ test_mdd_files = [
 ]
 
 def scan_and_capture_program_files(path):
-    """Use this to generate the test_program_files_data """
+    """Self-written wrapper  to scan for files in a directory and produce a variable with files contents
+    Use this to generate the test_program_files_data """
     root = Path(path)
     excluded = {".git", "__pycache__",".DS_Store"}
 
@@ -68,7 +69,11 @@ def scan_and_capture_program_files(path):
 
 
 def write_program_files(path,files_data):
-    """Use this to create physical files for the test program on disk
+    """Self-written wrapper to write physical files to given location
+
+    Path and files data are sent as params
+
+    Use this to create physical files for the test program on disk
     The source for files is test_program_files_data
     And the target is tmp_path (assuming all we create is in src/)
     """
@@ -91,6 +96,8 @@ def write_program_files(path,files_data):
 
 
 def call_executable(subprocess_args,path,timeout=60,scope='executable',input=None,allow_nonzero_status=False):
+    """Self-written wrapper to ease launching of an executable
+    "scope" is a part added to outputs, to the beginning of every line"""
     print(f'{scope}: launch executable; to verify: path == "{path}", callable == "{subprocess_args[0]}"')
     argsadd = {}
     if input:
@@ -118,6 +125,11 @@ def call_executable(subprocess_args,path,timeout=60,scope='executable',input=Non
 
 
 def call_py_script(path_python_executable,subprocess_args,path,timeout=60,scope='py script',input=None,requirements=''):
+    """Self-written wrapper to ease launching a py file
+
+    Can assist in setting venv and installing requirements
+
+    "scope" is a part added to outputs, to the beginning of every line"""
     def get_python_base_exe():
         """Some fallback fn to find "system" python executable to set venv - but it looks it is not needed. The issue was very different"""
         try:
@@ -198,6 +210,7 @@ def call_py_script(path_python_executable,subprocess_args,path,timeout=60,scope=
 
 
 def test_test_outputs(tmp_path):
+    """Actual test - will call "setup.py --program test" and will verify there is a "hello world" in the outputs"""
     def check_test_output_correct(output):
         """Individual tests to check outputs from specific programs"""
         # assert re.match()
@@ -230,6 +243,7 @@ def test_test_outputs(tmp_path):
 
 @pytest.fixture(scope='module')
 def installed(tmp_path_factory):
+    """Helper for tests - installs the tool into tmp locaiton"""
     tmp_path = tmp_path_factory.mktemp('temp_installed')
     setup(tmp_path)
     return {
@@ -240,6 +254,7 @@ def installed(tmp_path_factory):
 
 
 def setup(tmp_path):
+    """Actually, the installation subroutine wrapper, called from "installed" fixture for tests"""
     write_program_files(tmp_path,[('which_py_executable.py','import sys\nprint(sys.executable)')])
     py_executable = Path(call_py_script(None,['which_py_executable.py'],path=tmp_path,requirements='pywin32').stdout.strip()).resolve()
     py_expected_executable = Path( Path(tmp_path) / '.venv/Scripts/python.exe' ).resolve()
@@ -248,6 +263,7 @@ def setup(tmp_path):
 
 
 def test_read_mdd_1(installed,tmp_path):
+    """Actual test - read mdd"""
     install_tmp_path = installed['path']
     py_executable = installed['python']
     write_program_files(tmp_path,test_mdd_files)
@@ -258,6 +274,7 @@ def test_read_mdd_1(installed,tmp_path):
     print('PASS')
 
 def test_read_mdd_2(installed,tmp_path):
+    """Actual test - read another mdd"""
     install_tmp_path = installed['path']
     py_executable = installed['python']
     write_program_files(tmp_path,test_mdd_files)
@@ -268,16 +285,20 @@ def test_read_mdd_2(installed,tmp_path):
     print('PASS')
 
 # def test_codecs_issue(installed,tmp_path):
+#     """Actual test - verify... Not sure what, will elaborate on this later"""
 #     raise NotImplementedError('TBD')
 
 def test_real_diff(installed,tmp_path):
+    """Actual test - actually verify the git diff itself
+    
+    Warning: ton of params"""
     install_tmp_path = installed['path']
     py_executable = installed['python']
     write_program_files(
         tmp_path,
         [
             *test_mdd_files,
-            ('.gitattributes','*.mdd diff=mdd\n')
+            ('.gitattributes','*.mdd diff=mdd\n'),
         ]
     )
     mdd_test_ver_1_name = test_mdd_files[0][0] # only the file name

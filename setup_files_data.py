@@ -283,5 +283,9 @@ Hello use this as intended # TODO:
 raise NotImplementedError('Not implemented') # TODO:
             '''
         ),
+        (
+            '.gitattributes',
+            '*.mdd diff=mdd\n'
+        ),
     ]
 
